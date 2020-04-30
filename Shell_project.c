@@ -22,8 +22,7 @@ To compile and run the program:
 //                            MAIN          
 // -----------------------------------------------------------------------
 
-int main(void)
-{
+int main(void) {
 	char inputBuffer[MAX_LINE]; /* buffer to hold the command entered */
 	int background;             /* equals 1 if a command is followed by '&' */
 	char *args[MAX_LINE/2];     /* command line (of 256) has max of 128 arguments */
@@ -51,3 +50,4 @@ int main(void)
 
 	} // end while
 }
+//añado ultima linea jeje
