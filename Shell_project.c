@@ -52,6 +52,7 @@ int main(void) {
 		// the steps are:
 		//	 (1) fork a child process using fork()
 			 pid_fork = fork();
+			 new_process_group(pid_fork);
 		//	 (2) the child process will invoke execvp()
 			 if(pid_fork == 0){
 			 	execvp(args[0], args);
@@ -73,6 +74,8 @@ int main(void) {
 
 	} // end while
 }
-//añado ultima linea jeje
-//pongo esta segunda lina
-//añado tercera linea
+
+/*
+	He hecho la primera parte de la tarea 2
+	Tengo que crear el grupo de procesos y blabla
+*/
