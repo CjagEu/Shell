@@ -15,3 +15,8 @@ git push
 ##PARA RECIBIR CAMBIOS SHELL:
 
 git push
+
+
+## PARA COMPILAR
+
+Compilar: gcc Shell_project.c job_control.c -o Shell
