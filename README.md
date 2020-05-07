@@ -1,7 +1,7 @@
 # Shell
 Proyecto Shell para Sistemas Operativos
 
-##PARA ENVIAR CAMBIOS SHELL:
+## PARA ENVIAR CAMBIOS SHELL:
 
 En un terminal en .../Documentos/Shell$ 
 
