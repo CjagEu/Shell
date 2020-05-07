@@ -15,6 +15,7 @@ To compile and run the program:
 **/
 
 #include "job_control.h"   // remember to compile with module job_control.c 
+#include "string.h"
 
 #define MAX_LINE 256 /* 256 chars per line, per command, should be enough. */
 
@@ -34,19 +35,41 @@ int main(void) {
 
 	while (1)   /* Program terminates normally inside get_command() after ^D is typed*/
 	{   		
+		setvbuf(stdout, NULL, _IONBF, 0);
+		setvbuf(stderr, NULL, _IONBF, 0);
 		printf("COMMAND->");
 		fflush(stdout);
 		get_command(inputBuffer, MAX_LINE, args, &background);  /* get next command */
 		
 		if(args[0]==NULL) continue;   // if empty command
 
-		/* the steps are:
-			 (1) fork a child process using fork()
-			 (2) the child process will invoke execvp()
-			 (3) if background == 0, the parent will wait, otherwise continue 
-			 (4) Shell shows a status message for processed command 
-			 (5) loop returns to get_commnad() function
-		*/
+		//Comprobar si es un comando interno 
+		if(strcmp(args[0], "cd") == 0){
+			printf("Ejecutando comando interno\n");
+			chdir(args[1]);
+			continue;
+		}
+		// the steps are:
+		//	 (1) fork a child process using fork()
+			 pid_fork = fork();
+		//	 (2) the child process will invoke execvp()
+			 if(pid_fork == 0){
+			 	execvp(args[0], args);
+			 	printf("ERROR, comando no puede ser ejecutado\n");
+				exit(-1);
+			 }else{
+		//	 (3) if background == 0, the parent will wait, otherwise continue 
+		//	 (4) Shell shows a status message for processed command 
+			 	if(background == 0){
+					 waitpid(pid_fork, &status, 0);
+				 	status_res = analyze_status(status, &info);
+					 printf("Foreground pid: %d, command: %s, %s, info: %d \n", pid_fork,args[0], status_strings[status_res], info);
+			 	}else{
+					 printf("Background job running... pid: %d, command: %s \n", pid_fork, args[0]);
+				 }
+			 }
+		//	 (5) loop returns to get_commnad() function
+
 
 	} // end while
 }
