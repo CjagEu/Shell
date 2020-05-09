@@ -33,14 +33,18 @@ int main(void) {
 	enum status status_res; /* status processed by analyze_status() */
 	int info;				/* info processed by analyze_status() */
 
+	ignore_terminal_signals();		//Voy a ignorar señales para que los hijos puedan establecer el control del terminal
+	
 	while (1)   /* Program terminates normally inside get_command() after ^D is typed*/
 	{   		
 		setvbuf(stdout, NULL, _IONBF, 0);
 		setvbuf(stderr, NULL, _IONBF, 0);
 		printf("COMMAND->");
 		fflush(stdout);
-		get_command(inputBuffer, MAX_LINE, args, &background);  /* get next command */
+
 		
+		get_command(inputBuffer, MAX_LINE, args, &background);  /* get next command */
+
 		if(args[0]==NULL) continue;   // if empty command
 
 		//Comprobar si es un comando interno 
@@ -52,17 +56,29 @@ int main(void) {
 		// the steps are:
 		//	 (1) fork a child process using fork()
 			 pid_fork = fork();
-			 new_process_group(pid_fork);
 		//	 (2) the child process will invoke execvp()
 			 if(pid_fork == 0){
-			 	execvp(args[0], args);
-			 	printf("ERROR, comando no puede ser ejecutado\n");
-				exit(-1);
+				//Lo meto en un grupo de procesos, y entra automaticamente a segundo plano por estar en el grupo de procesos.
+				new_process_group(getpid());		
+				if(background == 0){
+					set_terminal(getpid());		//Si no es background, le doy el poder.
+					restore_terminal_signals();	//Antes de ejecutar el hijo, hago que escuche las señales.
+					execvp(args[0], args);
+			 		printf("ERROR, comando no puede ser ejecutado\n");
+					exit(-1);
+				}else{
+					restore_terminal_signals();	//Antes de ejecutar el hijo, hago que escuche las señales.
+			 		execvp(args[0], args);
+			 		printf("ERROR, comando no puede ser ejecutado\n");
+					exit(-1);
+				}
 			 }else{
 		//	 (3) if background == 0, the parent will wait, otherwise continue 
 		//	 (4) Shell shows a status message for processed command 
 			 	if(background == 0){
-					 waitpid(pid_fork, &status, 0);
+					 waitpid(pid_fork, &status, WUNTRACED); //WUNTRACED (antes 0), es para trackear si ha finalizado bien, o se ha suspendido etc
+					 //Tras esperar al hijo, le devuelvo el control a la shell
+					 set_terminal(getpid());
 				 	status_res = analyze_status(status, &info);
 					 printf("Foreground pid: %d, command: %s, %s, info: %d \n", pid_fork,args[0], status_strings[status_res], info);
 			 	}else{
@@ -76,6 +92,5 @@ int main(void) {
 }
 
 /*
-	He hecho la primera parte de la tarea 2
-	Tengo que crear el grupo de procesos y blabla
+	Tarea 2 Terminada
 */
